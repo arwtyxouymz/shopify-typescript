@@ -6,6 +6,8 @@ import Shopify, { ApiVersion } from '@shopify/shopify-api'
 import next from 'next'
 import Koa from 'koa'
 import Router from 'koa-router'
+import { createClient, getSubscriptionUrl } from './handlers'
+import { ExtendedKoaContext } from './extended-context'
 
 declare var process: {
   env: {
@@ -53,7 +55,7 @@ app.prepare().then(async () => {
       async afterAuth(ctx: Koa.Context) {
         // Access token and shop available in ctx.state.shopify
         const { shop, accessToken, scope } = ctx.state.shopify
-        const host = ctx.query.host
+        // const host = ctx.query.host
         ACTIVE_SHOPIFY_SHOPS[shop] = scope
 
         const response = await Shopify.Webhooks.Registry.register({
@@ -72,8 +74,8 @@ app.prepare().then(async () => {
           )
         }
 
-        // Redirect to app with shop parameter upon auth
-        ctx.redirect(`/?shop=${shop}&host=${host}`)
+        ctx.client = createClient(shop, accessToken)
+        await getSubscriptionUrl(ctx as ExtendedKoaContext)
       },
     })
   )

@@ -1,7 +1,8 @@
-import "isomorphic-fetch";
-import { gql } from "apollo-boost";
+import 'isomorphic-fetch'
+import { gql } from '@apollo/client'
+import { ExtendedKoaContext } from 'server/extended-context'
 
-export function RECURRING_CREATE(url) {
+export const RECURRING_CREATE = (url: string) => {
   return gql`
     mutation {
       appSubscriptionCreate(
@@ -35,16 +36,16 @@ export function RECURRING_CREATE(url) {
               id
             }
         }
-    }`;
+    }`
 }
 
-export const getSubscriptionUrl = async ctx => {
-  const { client } = ctx;
+export const getSubscriptionUrl = async (ctx: ExtendedKoaContext) => {
+  const { client } = ctx
   const confirmationUrl = await client
     .mutate({
-      mutation: RECURRING_CREATE(process.env.HOST)
+      mutation: RECURRING_CREATE(process.env.HOST as string),
     })
-    .then(response => response.data.appSubscriptionCreate.confirmationUrl);
+    .then((response) => response.data.appSubscriptionCreate.confirmationUrl)
 
-  return ctx.redirect(confirmationUrl);
-};
+  return ctx.redirect(confirmationUrl)
+}
